@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+          integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+          crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <title>Отбор астрономов</title>
+    <style>
+        * {
+  box-sizing: border-box;
+}
+
+.container {
+  position: relative;
+}
+
+.mySlides {
+  display: none;
+}
+
+.cursor {
+  cursor: pointer;
+}
+
+.prev,
+.next {
+  cursor: pointer;
+  position: absolute;
+  top: 40%;
+  width: auto;
+  padding: 16px;
+  margin-top: -50px;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+.prev:hover,
+.next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.numbertext {
+  color: #f2f2f2;
+  font-size: 12px;
+  padding: 8px 12px;
+  position: absolute;
+  top: 0;
+}
+
+.caption-container {
+  text-align: center;
+  background-color: #222;
+  padding: 2px 16px;
+  color: white;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+
+.demo {
+  opacity: 0.6;
+}
+
+.active,
+.demo:hover {
+  opacity: 1;
+}
+    </style>
+</head>
+<body>
+<h1>Миссия Колонизация Марса</h1>
+<h4>И на Марсе будут яблони цвести!</h4>
+<h2>Пейзажи Марса</h2>
+<div>
+<div class="container">
+  <div class="mySlides">
+    <div class="numbertext">1 / 4</div>
+      <img src="*/templates/static/img/mars1.png" style="width:100%">
+  </div>
+
+  <div class="mySlides">
+    <div class="numbertext">2 / 4</div>
+      <img src="*/templates/static/img/mars1.png" style="width:100%">
+  </div>
+
+  <div class="mySlides">
+    <div class="numbertext">3 / 4</div>
+      <img src="*/templates/static/img/mars1.png" style="width:100%">
+  </div>
+
+  <div class="mySlides">
+    <div class="numbertext">4 / 4</div>
+      <img src="*/templates/static/img/mars1.png" style="width:100%">
+  </div>
+
+  <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+  <a class="next" onclick="plusSlides(1)">&#10095;</a>
+
+  <div class="caption-container">
+    <p id="caption"></p>
+  </div>
+
+  <div class="row">
+    <div class="column">
+      <img class="demo cursor" src="/static/img/mars1.png" style="width:100%" onclick="currentSlide(1)" alt="Лес">
+    </div>
+    <div class="column">
+      <img class="demo cursor" src="/static/img/Age14.png" style="width:100%" onclick="currentSlide(3)" alt="Лес">
+    </div>
+    <div class="column">
+      <img class="demo cursor" src="/static/img/Age16.png" style="width:100%" onclick="currentSlide(4)" alt="Лес">
+    </div>
+    <div class="column">
+      <img class="demo cursor" src="/static/img/boy15.png" style="width:100%" onclick="currentSlide(4)" alt="Лес">
+    </div>
+  </div>
+</div>
+    <form class="login_form" method="post">
+        <div class="form-group">
+            <ul style="list-style-type: none">
+                <li><input type="file" class="form-control-file" id="photo" name="file">
+                <li><label for="photo"></label>
+            </ul>
+        </div>
+        <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+</div>
+</body>
+</html>
