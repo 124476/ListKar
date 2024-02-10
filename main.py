@@ -1,221 +1,88 @@
-import os
-import pygame
-import sys
+from flask import Flask, request, render_template, redirect
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.validators import DataRequired
+import shutil
 
 
-def load_level(filename):
-    filename = "data/" + filename
-    # читаем уровень, убирая символы перевода строки
-    with open(filename, 'r') as mapFile:
-        level_map = [line.strip() for line in mapFile]
-
-    # и подсчитываем максимальную длину
-    max_width = max(map(len, level_map))
-
-    # дополняем каждую строку пустыми клетками ('.')
-    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+class LoginForm(FlaskForm):
+    IdAst = StringField('Id астронавта', validators=[DataRequired()])
+    PassAst = PasswordField('Пароль астронавта', validators=[DataRequired()])
+    IdCom = StringField('Id капитана', validators=[DataRequired()])
+    PassCom = PasswordField('Пароль капитана', validators=[DataRequired()])
+    remember_me = BooleanField('Запомнить меня')
+    submit = SubmitField('Войти')
 
 
-def load_image(name, color_key=None):
-    fullname = os.path.join('data', name)
-    # если файл не существует, то выходим
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    return image
+app = Flask(__name__)
 
 
-tile_images = {
-    'wall': load_image('box.png'),
-    'empty': load_image('grass.png')
-}
-player_image = load_image('mar.png')
-
-tile_width = tile_height = 50
-
-CELL_SIZE = 50
+@app.route('/')
+@app.route('/index')
+def index():
+    user = "Заготова"
+    return render_template('index.html', title=user)
 
 
-#  описание классов воды, непроходимых стен и разрешенной для ходьбы дороги
-class Tile(pygame.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y):
-        self.pos_x = pos_x
-        self.tile_type = tile_type
-        self.pos_y = pos_y
-        super().__init__(tiles_group, all_sprites)
-        self.image = tile_images[tile_type]
-        self.rect = self.image.get_rect().move(
-            CELL_SIZE * pos_x, CELL_SIZE * pos_y)
-
-    #  получение названия текущего объекта
-    def get_tile_type(self):
-        return self.tile_type
-
-    #  возврат координат текущего объекста
-    def get_pos(self):
-        return self.pos_x, self.pos_y
-
-    # удаление изображения кристалла в момент его помещения в сундук
-    def del_crystal(self):
-        self.image = tile_images['empty']
-        self.tile_type = 'empty'
+@app.route('/answer')
+@app.route('/auto_answer')
+def answer(title='Заголовка',
+           surname='Watny',
+           name='Mark',
+           education='выше среднего',
+           profession='штурман марсохода',
+           sex='male',
+           motivation='Всегда мечтал застрять на Марсе!',
+           ready='True'):
+    return render_template('auto_answer.html', title=title,
+                           surname=surname,
+                           name=name,
+                           education=education,
+                           profession=profession,
+                           sex=sex,
+                           motivation=motivation,
+                           ready=ready)
 
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
-        self.image = player_image
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x + 15, tile_height * pos_y + 5)
-
-    #  текущие координаты сундука
-    def get_pos(self):
-        return self.pos_x, self.pos_y
-
-    #  перемещение сундука по экрану
-    def update(self, x, y):
-        self.rect.x += x
-        self.rect.y += y
-        if pygame.sprite.spritecollide(self, tiles_group, False)[0].get_tile_type() == 'wall':
-            if x > 0:
-                self.rect.x -= x
-            elif x < 0:
-                self.rect.x += x
-            elif y > 0:
-                self.rect.y -= y
-            elif y < 0:
-                self.rect.y += y
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        return redirect('/success')
+    return render_template('login.html', title='Авторизация', form=form)
 
 
-# основной персонаж
-player = None
-
-# группы спрайтов
-all_sprites = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
+@app.route('/distribution')
+def distribution():
+    return render_template('distribution.html')
 
 
-def generate_level(level):
-    new_player, x, y = None, None, None
-    for i in range(len(level)):
-        level[i] = 10 * level[i].replace('@', '.') + level[i] + 10 * level[i].replace('@', '.')
-    a = []
-    for i in level:
-        a.append(i.replace('@', '.'))
-    level = 10 * a + level + 10 * a
+@app.route('/table/<male>/<female>')
+def table(male, female):
+    if male == 'male':
+        p = 1
+    else:
+        p = 2
 
-    for y in range(len(level)):
-        for x in range(len(level[y])):
-            if level[y][x] == '.':
-                Tile('empty', x, y)
-            elif level[y][x] == '#':
-                Tile('wall', x, y)
-            elif level[y][x] == '@':
-                Tile('empty', x, y)
-                new_player = Player(x, y)
-    # вернем игрока, а также размер поля в клетках
-    return new_player, x, y
+    try:
+        if int(female) <= 15:
+            n = 1
+            p = p * 10 + 1
+        else:
+            n = 2
+            p = p * 10 + 2
+        return render_template('table.html', pol=p, age=n)
+    except Exception:
+        pass
 
 
-m = input('Введите название карты: ')
-player, level_x, level_y = generate_level(load_level(m))
-
-clock = pygame.time.Clock()
-
-FPS = 50
-
-
-def terminate():
-    pygame.quit()
-    sys.exit()
+@app.route('/galery', methods=['POST', 'GET'])
+def galery():
+    if request.method == 'POST':
+        shutil.copyfile(request.form['file'], '/static/img/mars1.png')
+    return render_template('galery.html')
 
 
-def start_screen():
-    intro_text = [""]
-
-    fon = pygame.transform.scale(load_image('fon.jpg'), (800, 500))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
-
-        pygame.display.flip()
-        clock.tick(FPS)
-
-
-class Camera:
-    # зададим начальный сдвиг камеры
-    def __init__(self):
-        self.dx = 0
-        self.dy = 0
-
-    # сдвинуть объект obj на смещение камеры
-    def apply(self, obj):
-        obj.rect.x += self.dx
-        obj.rect.y += self.dy
-
-    # позиционировать камеру на объекте target
-    def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - height // 2)
-
-
-camera = Camera()
 if __name__ == '__main__':
-    pygame.init()
-    pygame.display.set_caption('Движущийся круг 2')
-    size = width, height = 800, 500
-    screen = pygame.display.set_mode(size)
-    x, y = player.rect.x, player.rect.y
-
-    running = True
-    start_screen()
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    if player.rect.x - CELL_SIZE >= 0:
-                        player.rect.x -= CELL_SIZE
-                        if pygame.sprite.spritecollide(player, tiles_group, False)[0].get_tile_type() == 'wall':
-                            player.rect.x += CELL_SIZE
-                if event.key == pygame.K_RIGHT:
-                    if player.rect.x + CELL_SIZE < width:
-                        player.rect.x += CELL_SIZE
-                        if pygame.sprite.spritecollide(player, tiles_group, False)[0].get_tile_type() == 'wall':
-                            player.rect.x -= CELL_SIZE
-                if event.key == pygame.K_UP:
-                    if player.rect.y - CELL_SIZE >= 0:
-                        player.rect.y -= CELL_SIZE
-                        if pygame.sprite.spritecollide(player, tiles_group, False)[0].get_tile_type() == 'wall':
-                            player.rect.y += CELL_SIZE
-                if event.key == pygame.K_DOWN:
-                    if player.rect.y + CELL_SIZE < height:
-                        player.update(0, 50)
-        screen.fill((0, 0, 0))
-        # изменяем ракурс камеры
-        camera.update(player)
-        # обновляем положение всех спрайтов
-        for sprite in all_sprites:
-            camera.apply(sprite)
-        tiles_group.draw(screen)
-        player_group.draw(screen)
-        pygame.display.flip()
+    app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+    app.run(port=8000, host='127.0.0.1')
