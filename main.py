@@ -1,8 +1,11 @@
+import json
+
 from flask import Flask, request, render_template, redirect
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired
 import shutil
+import random
 
 
 class LoginForm(FlaskForm):
@@ -81,6 +84,16 @@ def galery():
     if request.method == 'POST':
         shutil.copyfile(request.form['file'], '/static/img/mars1.png')
     return render_template('galery.html')
+
+
+@app.route('/member')
+def member():
+    user = "Заготова"
+
+    with open('templates/db.json', encoding='utf8') as js_file:
+        js = json.load(js_file)
+    pUser = random.choices(js['users'])[0]
+    return render_template('member.html', title=user, name=pUser['name'], imgSrc=pUser['img'], info=pUser['info'])
 
 
 if __name__ == '__main__':
